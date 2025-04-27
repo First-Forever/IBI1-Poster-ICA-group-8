@@ -32,4 +32,4 @@ def most_frequent_trinucleotide(seq):
     return mmax_key, mmax_value, freq_dict                                     #Return the most sequence codons and their frequency
 seq = 'AUGGGAGGGGGGUUU'
 check_seq(seq)
-print(most_frequent_trinucleotide(seq)[0:2])
+print(most_frequent_trinucleotide(seq))
