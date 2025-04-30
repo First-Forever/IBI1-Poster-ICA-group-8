@@ -55,13 +55,16 @@ genetic_code = {
 }
 
 #Additional Function 1: Check if the sequence is valid
-def check_seq(seq):
+def check_sequence(seq):
     std_nucleotide = 'AGCU'         #Valid nucleotides
-    if seq[0:3] != 'AUG':
+    #Check if the sequence starts with start codon AUG
+    if seq[0:3] != 'AUG':                           #If the sequence does not start with AUG, print the error information and stop the program
         print("Start codon not valid! Try again!") 
         sys.exit()
+    #Check if all nucleotides are valid
     for i in seq:
-        if i not in std_nucleotide:         #Check if all nucleotides in the sequence is valid; if not, raise ValueError
+        #If invalid nucleotide is detected, print error information (with error nucleotide & location), then stop the program
+        if i not in std_nucleotide:            
             print(f'The sequence has invalid nucleotide! Try again!\nInvalid nucleotide: {i}, location: {seq.find(i)}')
             sys.exit()
 
@@ -71,7 +74,7 @@ def largest_RSCU_dict(df):
     for index in df.index:
         now_AA = df.loc[index, 'Amino acid']
         now_RSCU = df.loc[index, 'RSCU']        #Find the AA and RSCU on each row
-        AA_RSCU_max_dict[index] = max(now_RSCU, AA_RSCU_max_dict.get(now_AA, 0))
+        AA_RSCU_max_dict[now_AA] = max(now_RSCU, AA_RSCU_max_dict.get(now_AA, 0))
         #If the AA exists in the dictionary, compare its value to current RSCU, choose the larger one;
         #If not, store it into the dictionary
     return AA_RSCU_max_dict
@@ -88,7 +91,7 @@ def CAI_calculator(sequence):
         RSCU_AA = RSCU_max[AA]
         CAI *= RSCU_codon / RSCU_AA
         if codon in ('UAA', 'UAG', 'UGA'):
-            L = i
+            L = i // 3
             break
     CAI = CAI ** (1/L)
     return CAI
@@ -98,8 +101,8 @@ def count_codon(seq):
     stop_codon = ('UAG', 'UAA', 'UGA')                              #Define the sequence of stop codon
     seq_len = len(seq)
     freq_dict = {}                                                  #Use dictionary to calculate all the frequency of codons (to save time)
-    for i in range(math.ceil(seq_len/3)):                           
-        now_seq = seq[i*3 : i*3 + 3]                                #Slice every three nucleotides
+    for i in range(0, seq_len, 3):                           
+        now_seq = seq[i : i + 3]                                #Slice every three nucleotides
         if now_seq in stop_codon:                                   #If stop codon is met, break the loop
             break
         freq_dict[now_seq] = freq_dict.get(now_seq, 0) + 1                   #If the codon is in the dictionary, add 1 to the value; if not, add it as a key and give the value as 1
@@ -153,9 +156,8 @@ def most_frequent_amino_acid(seq):
 #Function 3: Plot the frequency of amino acids:
 def amino_acid_frequency_plot(seq):
     amino_acid_freq = count_AA(seq)
-    amino_acid_freq = pd.Series(data = amino_acid_freq.values(), index = amino_acid_freq.keys())
     plt.figure(figsize=(10, 6))
-    amino_acid_freq.plot(kind='bar')
+    plt.bar(x = amino_acid_freq.keys(), height = amino_acid_freq.values())
     plt.title('Frequency Distribution of Encoded Amino Acids')
     plt.xlabel('Amino Acid')
     plt.ylabel('Frequency')
@@ -170,8 +172,15 @@ for line in file:
         break
     skip_row += 1
 RSCU = pd.read_table('', skiprows = skip_row) """
-seq = 'AUGUAUGCCUCC'
-check_seq(seq)
+seq = ("AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUCACUGAUGAGUAU"
+    "UUUCUUCACCCUAACUAUGGGAGCGAACUCCAUCUGGACUACAAUGCUGAGGUA"
+    "UUGACUGCUGAAGUGGCACUUGGACCCUACUAUGGUAAGAAUACUGCCAGACCG"
+    "CGCCUUCUUGACAUUAUGGUGACUGUACAGAAUGUGAUGGGUUCUCCUGACUAC"
+    "AUGGUGGAGGCCAUUAAGGAAGCUGAUAACCCUAUUGAUUACUUGAUCAGACUG"
+    "ACUGGUGCACUUGGUGUUGUCAUGACUGGUGCCCGUAAGUUCUUGAAAGACGGU"
+    "GGUACUCCUCGUCCUAAGGAACUGACUGGUCAGCUGCUGAAUAAGCAUAAGACC"
+    "AUCAGUCGCCUUAUUGACAAUAAGUAUGGUGACUUCACUGAUGAGUUCUAA")
+check_sequence(seq)
 print(most_frequent_trinucleotide(seq))
 print(most_frequent_amino_acid(seq))
 amino_acid_frequency_plot(seq)
