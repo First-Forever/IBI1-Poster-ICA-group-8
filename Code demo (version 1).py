@@ -21,15 +21,8 @@ RSCU = pd.read_table(str(species) + '_RSCU.tsv', skiprows = skip_row)
 for i in range(len(RSCU['CODON'].tolist())):
     RSCU.loc[i,'CODON'] = re.sub('T', 'U', RSCU['CODON'][i]) # sub T to U
 
-seq = ("AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUCACUGAUGAGUAU"
-    "UUUCUUCACCCUAACUAUGGGAGCGAACUCCAUCUGGACUACAAUGCUGAGGUA"
-    "UUGACUGCUGAAGUGGCACUUGGACCCUACUAUGGUAAGAAUACUGCCAGACCG"
-    "CGCCUUCUUGACAUUAUGGUGACUGUACAGAAUGUGAUGGGUUCUCCUGACUAC"
-    "AUGGUGGAGGCCAUUAAGGAAGCUGAUAACCCUAUUGAUUACUUGAUCAGACUG"
-    "ACUGGUGCACUUGGUGUUGUCAUGACUGGUGCCCGUAAGUUCUUGAAAGACGGU"
-    "GGUACUCCUCGUCCUAAGGAACUGACUGGUCAGCUGCUGAAUAAGCAUAAGACC"
-    "AUCAGUCGCCUUAUUGACAAUAAGUAUGGUGACUUCACUGAUGAGUUCUAA")
-
+seq = ("AUGGCCAAGGUUACCGAUCAUCCUGAAGAGCUUCAGUUCUUCCAGAAGGCCCAGUACUUC"
+"GAGCAGAUCCUCAACAGUCGGACUGAGUUCUUGACCCGGCUGGAACAGUAAGGAGGGUGA")
 
 # Add a dictionary called genetic_code to store all codons and their according amino acid
 genetic_code = { 
@@ -139,14 +132,11 @@ def most_frequent_trinucleotide(seq):
 # Function 2: most frequent amino acid
 # Initialize a dictionary to store AA counts
 freq_dict_AA = {} 
-#Translate all codons to amino acid counts                                      
-for codon in freq_dict.keys():                    
-    AA = genetic_code[codon]
-    freq_codon = freq_dict[codon]
-    if AA == 'Stop':                                    
-        break
-    # Add translated codon count into freq_dict_AA
-    freq_dict_AA[AA] = freq_dict_AA.get(AA, 0) + freq_codon 
+#Translate all codons to amino acid counts    
+codons = list(freq_dict.keys())
+AA_list = [genetic_code[codon] for codon in codons]
+for aa in AA_list:
+    freq_dict_AA[aa] = freq_dict_AA.get(aa, 0) + 1 
 
 def most_frequent_amino_acid(seq):
     mmax_value = 0
