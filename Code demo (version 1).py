@@ -21,8 +21,10 @@ RSCU = pd.read_table(str(species) + '_RSCU.tsv', skiprows = skip_row)
 for i in range(len(RSCU['CODON'].tolist())):
     RSCU.loc[i,'CODON'] = re.sub('T', 'U', RSCU['CODON'][i]) # sub T to U
 
-seq = ("AUGGCCAAGGUUACCGAUCAUCCUGAAGAGCUUCAGUUCUUCCAGAAGGCCCAGUACUUC"
-"GAGCAGAUCCUCAACAGUCGGACUGAGUUCUUGACCCGGCUGGAACAGUAAGGAGGGUGA")
+seq = ("AUGGCCAAGGUUACCGAUCAUCCUGAAGAGCUUCAGUUCUUCCAGAAGGCCCAGU"
+"ACUUCGAGCAGAUCCUCAACAGUCGGACUGAGUUCUUGACCCGGCUGGAACAGUA"
+"AGGAGGGUGA")
+
 
 # Add a dictionary called genetic_code to store all codons and their according amino acid
 genetic_code = { 
@@ -97,6 +99,19 @@ def check_sequence(seq):
             print(f'The sequence has invalid nucleotide! Try again!\nInvalid nucleotide: {i}, location: {seq.find(i)}')
             sys.exit()
     # Check if the length is divisible by 3 (exclution: stop codon exists)        
+    flag = True
+    # If not, check if stop codon exists                             
+    if seq_len % 3 != 0:                    
+        flag = False
+        stop_codon = ('UAG', 'UAA', 'UGA')
+        for i in range(0, seq_len, 3):
+            # If stop codon exists, the sequence is valid.
+            if seq[i: i+3] in stop_codon:   
+                flag = True
+                break
+    if not flag:
+        print('The sequence length cannot be divided by 3! Try again!')
+        sys.exit()
 
 # Function 1: most frequent trinucleotide
 # Count the number of every codon
@@ -130,27 +145,19 @@ def most_frequent_trinucleotide(seq):
     return mmax_key, mmax_value
 
 # Function 2: most frequent amino acid
-# Initialize a dictionary to store AA counts
-freq_dict_AA = {} 
-#Translate all codons to amino acid counts    
-codons = list(freq_dict.keys())
-AA_list = [genetic_code[codon] for codon in codons]
-for aa in AA_list:
-    freq_dict_AA[aa] = freq_dict_AA.get(aa, 0) + 1 
-
 def most_frequent_amino_acid(seq):
-    mmax_value = 0
-    mmax_key = []
-    for key in freq_dict_AA:
-        if freq_dict_AA[key] > mmax_value:                             
-            mmax_key.clear()
-            mmax_key.append(key)
-            mmax_value = freq_dict_AA[key]
-        elif freq_dict_AA[key] == mmax_value:                          
-            mmax_key.append(key)
-    return mmax_key, mmax_value
+    most_frequent_codon, max_count = most_frequent_trinucleotide(seq)
+    # Translate the codon to amino acid.
+    most_frequent_AA = [genetic_code.get(codon, 'Unknown') for codon in most_frequent_codon] 
+    return most_frequent_AA
 
 #Function 3: Plot the frequency of amino acids:
+# Initialize a dictionary to store AA counts
+freq_dict_AA = {}
+#Translate all codons to amino acid counts 
+for codon, cnt in freq_dict.items():
+    now_aa = genetic_code[codon]
+    freq_dict_AA[now_aa] = freq_dict_AA.get(now_aa, 0) + cnt   
 def amino_acid_frequency_plot(seq):
     # Extract the AA count data
     amino_acids = list(freq_dict_AA.keys())                          
