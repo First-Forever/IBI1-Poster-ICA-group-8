@@ -6,20 +6,22 @@ import numpy as np
 import re
 
 # Set necessary variables
-species = input('Choose the species you want to check (human/yeast/E.coli)：')
+species = ['human', 'yeast', 'E.coli']
 L = 0                         
-
-# Open the database required
-file = open(str(species) + '_RSCU.tsv', 'r')            
-skip_row = 0
-for line in file:
-    if 'CODON' in line:
-        break
-    skip_row += 1
-RSCU = pd.read_table(str(species) + '_RSCU.tsv', skiprows = skip_row)
-# Change T in the database to U
-for i in range(len(RSCU['CODON'].tolist())):
-    RSCU.loc[i,'CODON'] = re.sub('T', 'U', RSCU['CODON'][i]) # sub T to U
+RSCUs = pd.Series(None)
+for specie in species:
+    file = file = open(str(specie) + '_RSCU.tsv', 'r') 
+    file = open(str(specie) + '_RSCU.tsv', 'r')            
+    skip_row = 0
+    for line in file:
+        if 'CODON' in line:
+            break
+        skip_row += 1
+    RSCU = pd.read_table(str(specie) + '_RSCU.tsv', skiprows = skip_row)
+    # Change T in the database to U
+    for i in range(len(RSCU['CODON'].tolist())):
+        RSCU.loc[i,'CODON'] = re.sub('T', 'U', RSCU['CODON'][i]) # sub T to U
+    RSCUs[specie] = RSCU
 
 seq = ("AUGGCCAAGGUUACCGAUCAUCCUGAAGAGCUUCAGUUCUUCCAGAAGGCCCAGU"
 "ACUUCGAGCAGAUCCUCAACAGUCGGACUGAGUUCUUGACCCGGCUGGAACAGUA"
@@ -77,11 +79,7 @@ genetic_code = {
 
 #Check if the sequence is valid
 def check_sequence(seq):
-    std_nucleotide = 'AGCU' 
-    # Check for correct species
-    if species != 'human' and species != 'yeast' and species != 'E.coli':
-        print('Wrong species, please check your input.')
-        sys.exit()        
+    std_nucleotide = 'AGCU'         
     # Check if the sequence length is too short
     seq_len = len(seq)
     if seq_len < 3:
@@ -126,9 +124,9 @@ for i in range(0, seq_len, 3):
     freq_dict[now_seq] = freq_dict.get(now_seq, 0) + 1
     # Calculate number of codons (for additional function)                   
     L += 1
-    # If meets stop codon, break the loop                     
-    if now_seq in stop_codon:                                   
+    if now_seq in stop_codon:
         break
+    
 
 def most_frequent_trinucleotide(seq):                                    
     mmax_value = 0                                                  
@@ -194,8 +192,9 @@ def largest_RSCU_dict(df):
         #If not, store it into the dictionary
     return AA_RSCU_max_dict
 
-def CAI_calculator(sequence, freq_dict, L):
-    RSCU_max_dic = largest_RSCU_dict(RSCU)                                        
+def CAI_calculator(specie, freq_dict, L):
+    RSCU = RSCUs[specie]   
+    RSCU_max_dic = largest_RSCU_dict(RSCU)                                     
     cai = 1
     # Remove number of AUG & UGG from L
     freq_dict['AUG'] = freq_dict.get('AUG', 0)
@@ -216,7 +215,8 @@ def CAI_calculator(sequence, freq_dict, L):
 
 check_sequence(seq)
 mmax_key, mmax_count = most_frequent_trinucleotide(seq)
+amino_acid_frequency_plot(seq)
 print(f"Most frequent trinucleotide: {mmax_key}, max count: {mmax_count}")
 print(f"Most frequent amino acid: {most_frequent_amino_acid(seq)}")
-amino_acid_frequency_plot(seq)
-print(f"CAI value for {species}: {CAI_calculator(seq, freq_dict, L).round(3)}")
+for specie in species:
+    print(f"CAI value for {specie}: {CAI_calculator(specie, freq_dict, L).round(3)}")
