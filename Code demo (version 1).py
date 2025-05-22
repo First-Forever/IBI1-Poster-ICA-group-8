@@ -158,11 +158,11 @@ freq_dict_AA = {}
 for codon, cnt in freq_dict.items():
     now_aa = genetic_code[codon]
     freq_dict_AA[now_aa] = freq_dict_AA.get(now_aa, 0) + cnt   
+
 def amino_acid_frequency_plot(seq):
     # Extract the AA count data
-    amino_acids = list(freq_dict_AA.keys())                          
+    amino_acids = list(freq_dict_AA.keys())                       
     frequencies = list(freq_dict_AA.values())
-
     # Set the figure size
     plt.figure(figsize=(12, 6))                                         
     # Decorate the bar graph using viridis transformation
@@ -215,7 +215,8 @@ def CAI_calculator(sequence, freq_dict, L):
     return cai
 
 check_sequence(seq)
-print(most_frequent_trinucleotide(seq))
-print(most_frequent_amino_acid(seq))
+mmax_key, mmax_count = most_frequent_trinucleotide(seq)
+print(f"Most frequent trinucleotide: {mmax_key}, max count: {mmax_count}")
+print(f"Most frequent amino acid: {most_frequent_amino_acid(seq)}")
 amino_acid_frequency_plot(seq)
-print(CAI_calculator(seq, freq_dict, L))
+print(f"CAI value for {species}: {CAI_calculator(seq, freq_dict, L).round(3)}")
